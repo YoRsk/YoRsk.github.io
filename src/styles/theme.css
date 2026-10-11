@@ -22,13 +22,17 @@
   --border: #ece9e9;
 }
 
-/* Dark theme values */
+/* Dark theme values
+   采用 Dracula 配色（与 naoya-tech.com 一致）：
+   底 #282a36 / 正文 #f8f8f2 / 强调紫 #bd93f9 / 描边 #6272a4
+   注意 accent-foreground 用深色：#bd93f9 上放白字对比度仅 2.4:1，
+   改用 #282a36 后达 5.9:1（WCAG AA）。 */
 [data-theme="dark"] {
-  --background: #212737;
-  --foreground: #eaedf3;
-  --accent: #ff6b01;
-  --accent-foreground: #ffffff;
-  --muted: #343f60;
-  --muted-foreground: #afb9ca;
-  --border: #ab4b08;
+  --background: #282a36;
+  --foreground: #f8f8f2;
+  --accent: #bd93f9;
+  --accent-foreground: #282a36;
+  --muted: #44475a;
+  --muted-foreground: #e6e6e6;
+  --border: #6272a4;
 }
