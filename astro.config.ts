@@ -67,6 +67,16 @@ export default defineConfig({
   },
   vite: {
     plugins: [tailwindcss()],
+    build: {
+      /*
+       * 关键：Vite 默认把小于 4KB 的资源内联成 base64 data URI。
+       * Noto Sans SC 按 unicode-range 切成 200 多片，每片只有几 KB，
+       * 会被全部内联进 CSS —— CSS 单个文件涨到十几 MB，
+       * 浏览器必须整份下载，切片按需加载彻底失效。
+       * 设为 0 即一律输出独立文件（小图标本来也没几个，无副作用）。
+       */
+      assetsInlineLimit: 0,
+    },
   },
   fonts: [
     {
@@ -82,7 +92,13 @@ export default defineConfig({
       // getFontPathByWeight 默认按 format === "truetype" 挑选，正好命中这份 ttf。
       formats: ["woff2", "woff", "ttf"],
     },
+
   ],
+  /*
+   * 中文层不走这里的 Astro 字体 API：实测它只把第一个字体（Google Sans Code）
+   * 的 @font-face 注入页面，第二个中文字体虽然会下载文件却完全不生成 CSS。
+   * 中文改用 @fontsource/noto-sans-sc，由 Vite 打包自托管（见 src/styles/global.css）。
+   */
   env: {
     schema: {
       PUBLIC_GOOGLE_SITE_VERIFICATION: envField.string({

@@ -7,7 +7,13 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
-  --font-app: var(--font-google-sans-code);
+  /*
+   * 拉丁字符走 Google Sans Code（没有 CJK 字形），中文落到 Noto Sans SC。
+   * 顺序不能反：Noto Sans SC 自带拉丁字形，放前面会把英文也一起换掉。
+   * 浏览器会依次尝试每个 family，Google Sans Code 的 mono 兜底不含汉字，
+   * 会继续往后找到 Noto Sans SC。
+   */
+  --font-app: var(--font-google-sans-code), "Noto Sans SC", sans-serif;
 }
 
 /* Light theme values */

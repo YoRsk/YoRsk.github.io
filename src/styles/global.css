@@ -3,6 +3,22 @@
 @import "./typography.css";
 @import "rehype-callouts/theme/obsidian";
 
+/*
+ * 中文层：Google Sans Code 没有 CJK 字形，中文原本会退到 Courier New / 系统兜底字体。
+ * Noto Sans SC（思源黑体）与 Google Sans Code 同属 Google 开源字体家族、同为 OFL 协议，
+ * 审美同源（中性几何黑体）。
+ *
+ * 这里用 @fontsource 而不是 Astro 的 experimental fonts：
+ * 实测 Astro 只会把 fonts[] 里第一个字体的 @font-face 注入页面，
+ * 第二个中文字体虽然会下载切片文件，却完全不生成 CSS（详见 astro.config.ts 的注释）。
+ * @fontsource 由 Vite 打包、随站自托管，不依赖 jsdelivr / Google Fonts 等外部 CDN。
+ *
+ * 只引 400 / 700 两个字重；每个字重按 unicode-range 切成约 100 片，
+ * 浏览器只会下载页面里真正用到的那几片。
+ */
+@import "@fontsource/noto-sans-sc/400.css";
+@import "@fontsource/noto-sans-sc/700.css";
+
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
 @layer base {
