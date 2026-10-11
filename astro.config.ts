@@ -37,8 +37,10 @@ export default defineConfig({
     }),
   ],
   i18n: {
-    locales: ["zh-CN"],
-    defaultLocale: "zh-CN",
+    // 站点 UI 语言为英语（博客正文仍是中文，暂不翻译）。
+    // prefixDefaultLocale: false 保证 URL 不带 /en/ 前缀，与切换前完全一致。
+    locales: ["en"],
+    defaultLocale: "en",
     routing: {
       prefixDefaultLocale: false,
     },
@@ -74,7 +76,11 @@ export default defineConfig({
       fallbacks: ["monospace"],
       weights: [300, 400, 500, 600, 700],
       styles: ["normal", "italic"],
-      formats: ["woff", "ttf"],
+      // 顺序很重要：woff2 在前面 → 浏览器只下载 woff2（与 naoya-tech.com 一致，体积最小）。
+      // ttf 必须保留：动态 OG 图（src/utils/getOgFontData.ts）用 satori/opentype.js 解析字体，
+      // 它只认 sfnt（ttf/otf），解析不了 woff2（会报 "Unsupported OpenType signature wOF2"）。
+      // getFontPathByWeight 默认按 format === "truetype" 挑选，正好命中这份 ttf。
+      formats: ["woff2", "woff", "ttf"],
     },
   ],
   env: {

@@ -10,11 +10,12 @@ export default defineAstroPaperConfig({
   site: {
     url: "https://yorsk.github.io/",
     title: "The Simple",
-    description: "YoRsk 的个人博客：记录代码、折腾与思考。",
+    description: "YoRsk's personal blog — notes on code, tinkering, and thinking.",
     author: "YoRsk",
     profile: "https://github.com/YoRsk",
     ogImage: "default-og.jpg",
-    lang: "zh-CN",
+    // 站点 UI 语言（导航、按钮、日期格式等）为英语；博客正文仍以中文为主。
+    lang: "en",
     timezone: "Asia/Tokyo",
     dir: "ltr",
   },
