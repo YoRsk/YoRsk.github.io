@@ -1,0 +1,119 @@
+---
+/**
+ * Mermaid 客户端渲染器（对应旧 Hugo 站 layouts/_default/_markup/render-codeblock-mermaid.html）。
+ *
+ * 方案 B：不引入 mermaid 依赖、不改文章后缀为 .mdx。
+ * 用 is:inline 的 <script type="module"> 在浏览器端动态 import mermaid@11 的 ESM CDN 包，
+ * 把 mermaid 代码块（Astro/Shiki 输出为 `<pre data-language="mermaid"><code>`，
+ * 其它链路可能是 `<pre><code class="language-mermaid">`，两种都兼容）
+ * 替换成 `<div class="mermaid">` 后调用 mermaid.run()。
+ *
+ * - 页面里没有 mermaid 代码块时直接 return，零请求、零开销
+ * - 监听 <html> 的 class / data-theme 变化，主题切换后 debounce 200ms 重渲染
+ *   （AstroPaper 的 theme.ts 会同时改 class="dark" 和 data-theme="dark"）
+ *
+ * CDN 地址：https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs
+ * 若后续要本地化（离线可用），可改成本地 import("mermaid") 并加 vite.build.target: "esnext"。
+ */
+---
+
+<script is:inline data-astro-rerun type="module">
+  (() => {
+    const htmlEl = document.firstElementChild;
+
+    /** 当前主题：AstroPaper 同时维护 class="dark" 与 data-theme。 */
+    const isDarkTheme = () =>
+      htmlEl?.classList.contains("dark") === true ||
+      htmlEl?.getAttribute("data-theme") === "dark";
+
+    // Astro/Shiki 把语言放在 <pre data-language>，部分链路才会给 code 加 language-* class
+    const codeNodes = Array.from(
+      document.querySelectorAll(
+        'pre[data-language="mermaid"] > code, pre > code.language-mermaid'
+      )
+    );
+
+    // 没有 mermaid 块：直接退出，不发起任何 CDN 请求
+    if (codeNodes.length === 0) return;
+
+    // 保留原始文本（mermaid 渲染会覆盖元素内容，重渲染时需要还原）
+    const blocks = codeNodes.map(codeNode => {
+      const pre = codeNode.closest("pre") ?? codeNode.parentElement;
+      const container = document.createElement("div");
+      container.className = "mermaid";
+      // textContent 会自动反转义 &gt; &lt; &amp; 等 HTML 实体
+      const source = codeNode.textContent ?? "";
+      container.textContent = source;
+      pre?.replaceWith(container);
+      return { el: container, source };
+    });
+
+    let mermaidPromise = null;
+
+    /** 动态加载 mermaid（幂等，同页面只加载一次）。 */
+    const loadMermaid = () => {
+      if (!mermaidPromise) {
+        mermaidPromise = import(
+          "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs"
+        ).then(module => module.default ?? module);
+      }
+      return mermaidPromise;
+    };
+
+    /** 渲染（或主题切换后的重渲染）全部 mermaid 块。 */
+    const renderAll = async () => {
+      const mermaid = await loadMermaid();
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: isDarkTheme() ? "dark" : "neutral",
+        fontFamily: "var(--font-app, system-ui)",
+      });
+
+      for (const block of blocks) {
+        // 清掉上一次渲染出的 SVG，还原源码并去掉 mermaid 的已处理标记
+        block.el.querySelector("svg")?.remove();
+        block.el.removeAttribute("data-processed");
+        block.el.textContent = block.source;
+      }
+
+      await mermaid.run({ nodes: blocks.map(block => block.el) });
+    };
+
+    renderAll().catch(err => {
+      console.error("[MermaidLoader] 渲染失败：", err);
+    });
+
+    // 主题联动：明暗切换后按新主题重渲染
+    let debounceTimer = null;
+    const observer = new MutationObserver(() => {
+      if (debounceTimer) clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        renderAll().catch(err => {
+          console.error("[MermaidLoader] 主题切换后重渲染失败：", err);
+        });
+      }, 200);
+    });
+
+    if (htmlEl) {
+      observer.observe(htmlEl, {
+        attributes: true,
+        attributeFilter: ["class", "data-theme"],
+      });
+    }
+  })();
+</script>
+
+<style is:global>
+  /* Mermaid 兜底样式：图宽超出正文时允许横向滚动 */
+  .mermaid {
+    overflow-x: auto;
+    max-width: 100%;
+    text-align: center;
+  }
+
+  .mermaid svg {
+    max-width: 100%;
+    height: auto;
+  }
+</style>

@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240" role="img" aria-label="YoRsk avatar">
+  <defs>
+    <!-- 深色底：带青调的近黑，斜向微渐变避免死板 -->
+    <linearGradient id="yorsk-bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#16241f" />
+      <stop offset="1" stop-color="#0d1211" />
+    </linearGradient>
+
+    <!-- 字母 Y：单色青碧微渐变，克制不张扬 -->
+    <linearGradient id="yorsk-mark" x1="0" y1="0" x2="0.55" y2="1">
+      <stop offset="0" stop-color="#7ff0dd" />
+      <stop offset="1" stop-color="#2dd4bf" />
+    </linearGradient>
+
+    <!-- 中心极淡光晕，仅用于让标识从底色中浮起 -->
+    <radialGradient id="yorsk-glow" cx="0.5" cy="0.46" r="0.52">
+      <stop offset="0" stop-color="#2dd4bf" stop-opacity="0.15" />
+      <stop offset="1" stop-color="#2dd4bf" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- 底 -->
+  <rect width="240" height="240" fill="url(#yorsk-bg)" />
+
+  <!-- 中心光晕 -->
+  <circle cx="120" cy="120" r="112" fill="url(#yorsk-glow)" />
+
+  <!-- 发丝级内环 -->
+  <circle cx="120" cy="120" r="103" fill="none" stroke="#5eead4" stroke-opacity="0.16" stroke-width="1.5" />
+
+  <!-- 字母 Y：几何笔画，单色青碧 -->
+  <g fill="none" stroke="url(#yorsk-mark)" stroke-width="17" stroke-linecap="round">
+    <path d="M80 73 L120 121" />
+    <path d="M160 73 L120 121" />
+    <path d="M120 121 L120 167" />
+  </g>
+</svg>

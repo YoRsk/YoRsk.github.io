@@ -1,0 +1,62 @@
+name: Deploy to GitHub Pages
+
+on:
+  # 每次推送到 main 就构建并发布
+  push:
+    branches: [main]
+  # 允许在 Actions 页面手动触发
+  workflow_dispatch:
+
+# 给 GITHUB_TOKEN 授予 Pages 部署所需的权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只允许一个部署，排队中的部署不取消（避免发布到一半被中断）
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # withastro/action 一条龙完成：
+      #   1. 根据仓库里的 package-lock.json 自动识别 npm 并安装依赖
+      #   2. 执行 package.json 的 build 脚本
+      #      （astro check → astro build → pagefind → 复制索引）
+      #   3. 用 actions/upload-pages-artifact@v5 把 dist/ 上传为 Pages artifact
+      #
+      # ⚠️ 千万不要再自己加一个 actions/upload-pages-artifact 步骤：
+      #    两边上传的 artifact 都叫固定的 "github-pages"，
+      #    第二次上传会 409 冲突，整个 workflow 直接失败。
+      - name: Setup Node & build with Astro
+        uses: withastro/action@v6
+        with:
+          # 与本地开发保持一致（本地 Node v22.22.2）
+          node-version: 22
+          package-manager: npm@latest
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # 版本配套说明（2026-10 用 GitHub API 实测，版本均真实存在）：
+      #   actions/deploy-pages     现有 v4.0.5 与 v5.0.1 两个大版本
+      #   actions/upload-pages-artifact 现有 v4.0.0 与 v5.0.0
+      # withastro/action@v6 内部固定用 upload-pages-artifact@v5 上传，
+      # 因此这里配 deploy-pages@v5，与官方 README 的示例完全一致。
+      # 若以后要改成 v4，需同时改用 upload-pages-artifact@v4，
+      # 且不能再依赖 withastro/action 内置的上传步骤。
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
