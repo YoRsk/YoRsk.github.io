@@ -7,7 +7,7 @@ export default {
     tags: "Tags",
     about: "About",
     notes: "Notes",
-    admin: "Admin",
+    write: "Write",
     archives: "Archives",
     search: "Search",
   },

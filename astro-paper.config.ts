@@ -28,9 +28,12 @@ export default defineAstroPaperConfig({
     dynamicOgImage: true,
     showArchives: true,
     showBackButton: true,
+    // 「编辑本页」不再指向 GitHub 网页编辑器，改为深链进自带 CMS 的该文章编辑器。
+    // url 现在是**站点内的后台相对路径**（会被 getAssetPath() 自动补上 base），
+    // 组件会追加 #/collections/posts/entries/<slug>。默认值即 "admin/"。
     editPost: {
       enabled: true,
-      url: "https://github.com/YoRsk/YoRsk_astro/edit/main/",
+      url: "admin/",
     },
     search: "pagefind",
   },

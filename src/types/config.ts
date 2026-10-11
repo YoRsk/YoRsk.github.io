@@ -50,7 +50,11 @@ interface FeaturesConfig {
   editPost?:
     | {
         enabled: true;
-        /** Base URL for the edit link, e.g. GitHub edit URL */
+        /**
+         * Site-relative path to the CMS admin page, e.g. "admin/".
+         * The component appends `#/collections/posts/entries/<slug>`
+         * and resolves the Astro `base` automatically.
+         */
         url: string;
       }
     | { enabled: false };

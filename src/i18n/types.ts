@@ -5,7 +5,7 @@ export interface UIStrings {
     tags: string;
     about: string;
     notes: string;
-    admin: string;
+    write: string;
     archives: string;
     search: string;
   };

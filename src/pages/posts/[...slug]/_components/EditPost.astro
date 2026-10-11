@@ -3,6 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import IconEdit from "@/assets/icons/IconEdit.svg";
 import { useTranslations } from "@/i18n";
 import config from "@/config";
+import { getAssetPath } from "@/utils/withBase";
 
 type Props = {
   hideEditPost?: CollectionEntry<"posts">["data"]["hideEditPost"];
@@ -13,7 +14,23 @@ type Props = {
 const { hideEditPost, post, class: className = "" } = Astro.props;
 
 const editPost = config.features.editPost;
-const href = editPost.enabled ? `${editPost.url}${post.filePath}` : "";
+
+/*
+ * 「编辑本页」深链进 Sveltia CMS 的该文章编辑器：
+ *   /{base}/admin/#/collections/posts/entries/<slug>
+ * 与导航栏的「写作」是同一套系统：点这里直达本篇，可直接 Ctrl+V 贴图、
+ * 有带样式的预览、frontmatter 走表单（不会漏掉必填的 description）。
+ *
+ * 之前指向 GitHub 网页编辑器（改裸 md），缺点是不能贴图、frontmatter 手写易漏，
+ * 且漏了 description 会让 CI 直接构建失败。
+ *
+ * CMS collection 的 path 是 "{{slug}}.md"，其 subPath 正好等于 Astro 的 post.id。
+ * getAssetPath() 自动补 base，切换正式域名时无需改动这一行。
+ */
+const adminPath = getAssetPath(editPost.enabled ? editPost.url : "admin/");
+const href = editPost.enabled
+  ? `${adminPath.replace(/\/*$/, "/")}#/collections/posts/entries/${encodeURIComponent(post.id)}`
+  : "";
 const showEditPost = editPost.enabled && !hideEditPost && href.trim() !== "";
 
 const t = useTranslations(Astro.currentLocale);
