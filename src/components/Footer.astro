@@ -18,7 +18,7 @@ const currentYear = new Date().getFullYear();
   {...attrs}
 >
   <div
-    class="border-border flex flex-col items-center justify-between border-t py-6 sm:flex-row-reverse sm:py-4"
+    class="border-border flex flex-col items-center justify-between border-t pt-6 sm:flex-row-reverse sm:pt-4"
   >
     <Socials />
     <div class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row">
@@ -27,4 +27,20 @@ const currentYear = new Date().getFullYear();
       <span>{t.footer.allRightsReserved}</span>
     </div>
   </div>
+  {/*
+    模板致谢：本站基于 AstroPaper（MIT）二次开发。
+    MIT 在法律上只要求保留 LICENSE 里的版权声明（已保留 Sat Naing），
+    这里页脚的署名属于对原作者的致谢，不影响合规性。
+  */}
+  <p class="text-muted-foreground py-4 text-center text-xs">
+    Built with
+    <a
+      href="https://github.com/satnaing/astro-paper"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hover:text-accent underline"
+    >
+      AstroPaper
+    </a>
+  </p>
 </footer>

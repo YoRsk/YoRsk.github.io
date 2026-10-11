@@ -28,7 +28,10 @@ collections:
     sortable_fields: [pubDatetime, title]
     media_folder: ""
     public_folder: ""
-    summary: "{{title}} — {{year}}-{{month}}-{{day}}"
+    # summary 里引用的字段必须在下面 fields 中存在，否则 Sveltia 会报
+    # "The summary option refers to xxx, but no such field is defined" 并拒绝加载配置。
+    # 原先写的 {{year}}/{{month}}/{{day}} 从未定义过 —— 日期一律走 pubDatetime。
+    summary: "{{title}} · {{pubDatetime}}"
     fields:
       - { label: 标题, name: title, widget: string }
       - label: 发布日期
@@ -54,7 +57,10 @@ collections:
     sortable_fields: [pubDatetime, title]
     media_folder: ""
     public_folder: ""
-    summary: "{{title}} — {{year}}-{{month}}-{{day}}"
+    # summary 里引用的字段必须在下面 fields 中存在，否则 Sveltia 会报
+    # "The summary option refers to xxx, but no such field is defined" 并拒绝加载配置。
+    # 原先写的 {{year}}/{{month}}/{{day}} 从未定义过 —— 日期一律走 pubDatetime。
+    summary: "{{title}} · {{pubDatetime}}"
     fields:
       - { label: 标题, name: title, widget: string }
       - label: 日期
