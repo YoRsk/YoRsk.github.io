@@ -4,20 +4,51 @@
 @import "rehype-callouts/theme/obsidian";
 
 /*
- * 中文层：Google Sans Code 没有 CJK 字形，中文原本会退到 Courier New / 系统兜底字体。
- * Noto Sans SC（思源黑体）与 Google Sans Code 同属 Google 开源字体家族、同为 OFL 协议，
- * 审美同源（中性几何黑体）。
+ * ============================ 中文回退层：Maple Mono NF CN ============================
  *
- * 这里用 @fontsource 而不是 Astro 的 experimental fonts：
- * 实测 Astro 只会把 fonts[] 里第一个字体的 @font-face 注入页面，
- * 第二个中文字体虽然会下载切片文件，却完全不生成 CSS（详见 astro.config.ts 的注释）。
- * @fontsource 由 Vite 打包、随站自托管，不依赖 jsdelivr / Google Fonts 等外部 CDN。
+ * 为什么需要它：Google Sans Code 没有 CJK 字形，中文原本会落到系统兜底字体。
  *
- * 只引 400 / 700 两个字重；每个字重按 unicode-range 切成约 100 片，
- * 浏览器只会下载页面里真正用到的那几片。
+ * 【重要】这里不能走 Astro 的 experimental fonts API：
+ * 实测它只把 astro.config.ts 的 fonts[] 里【第一个】字体的 @font-face 注入页面，
+ * 后续字体虽然会下载文件，却完全不生成 CSS（详见 astro.config.ts 的注释）。
+ * 因此中文层必须自己手写 @font-face。
+ *
+ * 【字体来源】Maple Mono NF CN v8.0-beta.3（MapleMono-NF-CN[wght].ttf，源包 43 MB）
+ *   https://github.com/subframe7536/maple-font
+ *   许可：SIL Open Font License 1.1 —— 允许子集化与再分发。
+ *   注意：本文件是【子集化后的修改版本】，不是官方原版，详见下方【体积取舍】。
+ *
+ * 【子集化】public/fonts/maple-mono-nf-cn-subset.woff2，约 1.43 MiB，覆盖：
+ *   - GB2312 全部汉字 6763 个（一级 3755 + 二级 3008），中英混排零缺字
+ *   - CJK 标点 U+3000–303F、全角/半角形式 U+FF00–FFEF
+ *   - ASCII、Latin-1、通用标点、箭头、数学运算符、几何图形
+ *   - 已剔除全部 Nerd Font 私有区图标（U+E000–F8FF / U+F0000– 等 13000+ 字形），
+ *     博客正文用不上，且是源字体体积大头。
+ *
+ * 【体积取舍】为什么是「静态 400」而不是可变字体：
+ *   同一字符集下实测——
+ *     含 wght 可变轴  ...... 4354 KiB（4.25 MiB）
+ *     静态实例化 400  ...... 1464 KiB（1.43 MiB）
+ *   gvar 可变增量数据独占约 2/3 体积。若保留可变轴还想压进 1.5 MiB，
+ *   汉字只能砍到约 2000 个，会出现大量缺字。
+ *   故选择：保住 GB2312 全覆盖 + 守住 1.5 MiB 预算，代价是中文没有连续字重变化，
+ *   粗体由浏览器合成（faux bold），这是 CJK 网页字体的常见做法。
+ *
+ * 【不放 public/fonts 之外的原因】文件放在 public/ 下不进 Vite bundle：
+ *   Vite 不会处理它，因此不会被 assetsInlineLimit 内联成 base64 data URI
+ *   （Noto Sans SC 就是因此踩过坑：CSS 单文件涨到十几 MB）。
+ *   代价是路径写成绝对路径 /fonts/...，若日后 SITE_BASE 改为非空需同步调整。
+ *
+ * 【为什么不用 preload】1.43 MiB 提前预载会拖慢首屏；交给 font-display: swap
+ *   先用兜底字体显示、字体到位后再替换即可。
  */
-@import "@fontsource/noto-sans-sc/400.css";
-@import "@fontsource/noto-sans-sc/700.css";
+@font-face {
+  font-family: "Maple Mono NF CN";
+  src: url("/fonts/maple-mono-nf-cn-subset.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 

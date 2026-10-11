@@ -92,12 +92,12 @@ export default defineConfig({
       // getFontPathByWeight 默认按 format === "truetype" 挑选，正好命中这份 ttf。
       formats: ["woff2", "woff", "ttf"],
     },
-
   ],
   /*
    * 中文层不走这里的 Astro 字体 API：实测它只把第一个字体（Google Sans Code）
    * 的 @font-face 注入页面，第二个中文字体虽然会下载文件却完全不生成 CSS。
-   * 中文改用 @fontsource/noto-sans-sc，由 Vite 打包自托管（见 src/styles/global.css）。
+   * 中文改用 Maple Mono NF CN 的 GB2312 子集，自己写 @font-face，
+   * 字体文件自托管在 public/fonts/（见 src/styles/global.css）。
    */
   env: {
     schema: {
