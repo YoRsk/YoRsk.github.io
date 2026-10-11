@@ -1,15 +1,16 @@
 backend:
   name: github
-  repo: YoRsk/YoRsk_astro
+  # 2026-10-11 起仓库改名为 YoRsk.github.io（用户站点，发布在根域）
+  repo: YoRsk/YoRsk.github.io
   branch: main
 
-# ⚠️ site_url 必须带 base（与 astro-paper.config.ts 的 site.url 保持一致）
-site_url: https://yorsk.github.io/YoRsk_astro/
-logo_url: https://yorsk.github.io/YoRsk_astro/favicon.svg
+# ⚠️ site_url 必须与 astro-paper.config.ts 的 site.url 保持一致
+site_url: https://yorsk.github.io/
+logo_url: https://yorsk.github.io/favicon.svg
 
 # 全局图库
 # media_folder: 仓库根目录即项目根，直接写相对路径
-# public_folder: 绝对禁止写成 /images/uploads —— 在 /YoRsk_astro 子目录下必 404。
+# public_folder: 绝对禁止写成 /images/uploads —— 在子目录下部署时必 404。
 #   用 @/assets/... 别名，构建期由 astro:assets 解析、优化并自动补上 base，
 #   切换正式域名时【无需改动】。
 media_folder: src/assets/images/uploads

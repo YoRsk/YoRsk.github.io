@@ -20,14 +20,15 @@ import { transformerFileName } from "./src/utils/transformers/fileName";
 import config from "./astro-paper.config";
 
 // ⚠️ 部署子路径的【唯一真源】就在这里。
-// 试跑期（GitHub Pages 项目站点）：base = "/YoRsk_astro"
-// 切换正式域名时（设计文档附录 A 第 1 项）：删掉本行或改成 base: ""。
+// 试跑期（GitHub Pages 项目站点）曾是 "/YoRsk_astro"；
+// 2026-10-11 起仓库改名为 YoRsk.github.io（用户站点），直接发布在根域，不需要子路径。
 // 站内链接一律走 getAssetPath() / getRelativeLocaleUrl()，会自动带上 base，切勿硬编码。
-const SITE_BASE = "/YoRsk_astro";
+const SITE_BASE = "";
 
 export default defineConfig({
   site: config.site.url,
-  base: SITE_BASE,
+  // base 为 "" 时传 undefined，等价于不设 base（Astro 默认值）
+  base: SITE_BASE || undefined,
   integrations: [
     mdx(),
     sitemap({

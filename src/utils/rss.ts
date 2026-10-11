@@ -9,7 +9,7 @@ import config from "@/config";
 /**
  * 把相对路径转成绝对 URL。
  * 注意：path 以 "/" 开头，new URL() 会只保留 base 的 origin，
- * 因此 site.url 已含 /YoRsk_astro/ 也不会出现双重前缀。
+ * 因此 site.url 带子路径时也不会出现双重前缀（当前已切到根域，base 为空）。
  * @param {string} path 站内的根相对路径（已含 base）
  * @returns {string} 绝对 URL
  */

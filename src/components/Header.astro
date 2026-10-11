@@ -34,7 +34,7 @@ const isActive = (path: string) => {
 };
 
 // 「管理」指向 public/admin/index.html，是静态资源而非路由，
-// 因此走 getAssetPath() 自动补上 base（/YoRsk_astro/admin/），切勿写死 "/admin/"。
+// 因此走 getAssetPath() 自动补上 base（当前 base 为空 → /admin/），切勿写死 "/admin/"。
 const adminPath = getAssetPath("admin/");
 ---
 

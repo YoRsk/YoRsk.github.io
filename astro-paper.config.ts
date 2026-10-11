@@ -3,12 +3,12 @@ import { defineAstroPaperConfig } from "./src/types/config";
 /**
  * 站点级配置（YoRsk / The Simple）。
  *
- * ⚠️ site.url 必须与 astro.config.ts 的 base 保持一致（含仓库子路径）。
- * 切换正式域名时同步把这个值改成 "https://yorsk.github.io/"（设计文档附录 A 第 2 项）。
+ * ⚠️ site.url 必须与 astro.config.ts 的 base 保持一致。
+ * 2026-10-11 起仓库改名为 YoRsk.github.io，站点发布在根域，base 为空。
  */
 export default defineAstroPaperConfig({
   site: {
-    url: "https://yorsk.github.io/YoRsk_astro/",
+    url: "https://yorsk.github.io/",
     title: "The Simple",
     description: "YoRsk 的个人博客：记录代码、折腾与思考。",
     author: "YoRsk",

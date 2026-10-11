@@ -60,7 +60,7 @@ export function getNoteSlug(id: string, filePath: string | undefined): string {
  * @param {string} id 笔记 id
  * @param {string | undefined} filePath 笔记源文件路径
  * @param {string} [locale] 目标语言，默认取配置里的 site.lang
- * @returns {string} 形如 "/YoRsk_astro/notes/welcome"
+ * @returns {string} 形如 "/notes/welcome"
  */
 export function getNoteUrl(
   id: string,

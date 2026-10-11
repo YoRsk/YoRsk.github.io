@@ -36,7 +36,7 @@ function isSfnt(data: ArrayBuffer): boolean {
  * @returns {Promise<ArrayBuffer>} 字体二进制
  */
 async function readFontFromDisk(fontPath: string): Promise<ArrayBuffer> {
-  // 注意用 lastIndexOf：base 里也可能含 "_astro/"（例如 /YoRsk_astro/_astro/fonts/x.ttf）
+  // 注意用 lastIndexOf：base 里也可能含 "_astro/"（例如子目录部署时的 /<base>/_astro/fonts/x.ttf）
   const markerIndex = fontPath.lastIndexOf(ASSETS_MARKER);
   const relativePath =
     markerIndex >= 0
