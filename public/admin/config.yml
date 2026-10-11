@@ -16,11 +16,16 @@ logo_url: https://yorsk.github.io/favicon.svg
 media_folder: src/assets/images/uploads
 public_folder: "@/assets/images/uploads"
 
+# ⚠️【重要】name 是标识符，不是显示名：
+#   1. 必须与 Astro 内容目录名一致（src/content/posts、src/content/notes）
+#   2. 「编辑本页」深链硬编码了 #/collections/posts/entries/<slug>
+#      改 name 会让每篇文章的编辑入口直接 404
+#   CMS 界面上显示的是 label —— 要改显示名请改 label，绝不要动 name。
 collections:
   # ============ 博客文章 ============
   - name: posts
-    label: 文章
-    label_singular: 文章
+    label: Posts
+    label_singular: Post
     folder: src/content/posts
     path: "{{slug}}.md"
     create: true
@@ -33,23 +38,23 @@ collections:
     # 原先写的 {{year}}/{{month}}/{{day}} 从未定义过 —— 日期一律走 pubDatetime。
     summary: "{{title}} · {{pubDatetime}}"
     fields:
-      - { label: 标题, name: title, widget: string }
-      - label: 发布日期
+      - { label: Title, name: title, widget: string }
+      - label: Published
         name: pubDatetime
         widget: datetime
         date_format: YYYY-MM-DD
         time_format: HH:mm
         format: "YYYY-MM-DDTHH:mm:ssZ"
-      - { label: 草稿, name: draft, widget: boolean, default: false, required: false }
+      - { label: Draft, name: draft, widget: boolean, default: false, required: false }
       # description 是 zod schema 的必填字段，缺失会导致 CI 构建失败，故设为 required
-      - { label: 摘要, name: description, widget: text, required: true }
-      - { label: 标签, name: tags, widget: list, required: false }
-      - { label: 正文, name: body, widget: markdown }
+      - { label: Description, name: description, widget: text, required: true }
+      - { label: Tags, name: tags, widget: list, required: false }
+      - { label: Body, name: body, widget: markdown }
 
   # ============ 笔记区 ============
   - name: notes
-    label: 笔记
-    label_singular: 笔记
+    label: Notes
+    label_singular: Note
     folder: src/content/notes
     path: "{{slug}}.md"
     create: true
@@ -62,15 +67,15 @@ collections:
     # 原先写的 {{year}}/{{month}}/{{day}} 从未定义过 —— 日期一律走 pubDatetime。
     summary: "{{title}} · {{pubDatetime}}"
     fields:
-      - { label: 标题, name: title, widget: string }
-      - label: 日期
+      - { label: Title, name: title, widget: string }
+      - label: Date
         name: pubDatetime
         widget: datetime
         date_format: YYYY-MM-DD
         time_format: HH:mm
         format: "YYYY-MM-DDTHH:mm:ssZ"
-      - { label: 草稿, name: draft, widget: boolean, default: false, required: false }
+      - { label: Draft, name: draft, widget: boolean, default: false, required: false }
       # description 是 zod schema 的必填字段，缺失会导致 CI 构建失败，故设为 required
-      - { label: 摘要, name: description, widget: text, required: true }
-      - { label: 标签, name: tags, widget: list, required: false }
-      - { label: 正文, name: body, widget: markdown }
+      - { label: Description, name: description, widget: text, required: true }
+      - { label: Tags, name: tags, widget: list, required: false }
+      - { label: Body, name: body, widget: markdown }
