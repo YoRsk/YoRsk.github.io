@@ -27,7 +27,11 @@ collections:
     label: Posts
     label_singular: Post
     folder: src/content/posts
-    path: "{{slug}}.md"
+    # ⚠️ 这里【不要】写 path。Decap 会在 path 模板后面自动追加 extension（默认 md），
+    # 写成 path: "{{slug}}.md" 实际去找的是 "xxx.md.md"，于是 collection 读到 0 篇
+    #（线上曾因此显示 0 篇文章，但 assets 面板正常 —— backend 没问题，是路径模板错了）。
+    # 本仓库是扁平结构（folder 下直接就是 xxx.md），不需要 path；官方只在
+    # 嵌套结构 xxx/index.md 时才写 path: "{{slug}}/index"（同样不带 .md）。
     create: true
     slug: "{{slug}}"
     sortable_fields: [pubDatetime, title]
@@ -56,7 +60,11 @@ collections:
     label: Notes
     label_singular: Note
     folder: src/content/notes
-    path: "{{slug}}.md"
+    # ⚠️ 这里【不要】写 path。Decap 会在 path 模板后面自动追加 extension（默认 md），
+    # 写成 path: "{{slug}}.md" 实际去找的是 "xxx.md.md"，于是 collection 读到 0 篇
+    #（线上曾因此显示 0 篇文章，但 assets 面板正常 —— backend 没问题，是路径模板错了）。
+    # 本仓库是扁平结构（folder 下直接就是 xxx.md），不需要 path；官方只在
+    # 嵌套结构 xxx/index.md 时才写 path: "{{slug}}/index"（同样不带 .md）。
     create: true
     slug: "{{slug}}"
     sortable_fields: [pubDatetime, title]
