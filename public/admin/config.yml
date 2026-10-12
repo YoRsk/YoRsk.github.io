@@ -49,6 +49,16 @@ collections:
         date_format: YYYY-MM-DD
         time_format: HH:mm
         format: "YYYY-MM-DDTHH:mm:ssZ"
+      # modDatetime 是 Astro schema 里的可选字段（最后修改时间，z.date().optional()）。
+      # 现有文章 frontmatter 里都有它，但之前 CMS 的 fields 没定义 —— Sveltia 解析
+      # entry 时遇到未定义字段会报 "errors while parsing entry files"，列表打不开。
+      - label: Modified
+        name: modDatetime
+        widget: datetime
+        required: false
+        date_format: YYYY-MM-DD
+        time_format: HH:mm
+        format: "YYYY-MM-DDTHH:mm:ssZ"
       - { label: Draft, name: draft, widget: boolean, default: false, required: false }
       # description 是 zod schema 的必填字段，缺失会导致 CI 构建失败，故设为 required
       - { label: Description, name: description, widget: text, required: true }
@@ -79,6 +89,16 @@ collections:
       - label: Date
         name: pubDatetime
         widget: datetime
+        date_format: YYYY-MM-DD
+        time_format: HH:mm
+        format: "YYYY-MM-DDTHH:mm:ssZ"
+      # modDatetime 是 Astro schema 里的可选字段（最后修改时间，z.date().optional()）。
+      # 现有文章 frontmatter 里都有它，但之前 CMS 的 fields 没定义 —— Sveltia 解析
+      # entry 时遇到未定义字段会报 "errors while parsing entry files"，列表打不开。
+      - label: Modified
+        name: modDatetime
+        widget: datetime
+        required: false
         date_format: YYYY-MM-DD
         time_format: HH:mm
         format: "YYYY-MM-DDTHH:mm:ssZ"
