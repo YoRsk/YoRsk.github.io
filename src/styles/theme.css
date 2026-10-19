@@ -14,8 +14,10 @@
    * 浏览器依次尝试每个 family：Google Sans Code 的 mono 兜底不含汉字，
    * 会继续往后找到 Maple Mono NF CN。
    *
-   * 该中文层是 Maple Mono NF CN 的 GB2312 子集化版本（1.43 MiB，静态 400 字重），
-   * @font-face 定义在 global.css，SIL OFL 1.1。
+   * 该中文层是 Maple Mono NF CN 的 GB2312 子集化版本（静态 400 字重），按
+   * unicode-range 切成 119 片（114 片汉字 + latin/fullwidth/arrow/math/gbsym
+   * 五片符号），单页只下载命中的几片（现有三篇实测 213/233/279 KiB，平均约
+   * 242 KiB；切片前是单个 1,463.8 KiB）。@font-face 定义在 global.css，SIL OFL 1.1。
    *
    * 注意：因为是静态 400，粗体标题里的汉字由浏览器合成加粗（faux bold）。
    */
