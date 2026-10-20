@@ -1,12 +1,18 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="robots" content="noindex" />
-    <title>内容管理 - The Simple</title>
+    <title>Content Manager - YoRsk</title>
+    <!--
+      版本号必须锁死，不要写回 @sveltia/cms（不带版本号）。
+      原因：不带版本号时 jsDelivr 会解析到 latest，上游一发新版就静默替换正在运行的
+      后台代码 —— 表现为"昨天还好好的，今天列表突然变 0"这类无法复现的问题。
+      升级流程：先去 GitHub Release 确认新版修了什么 → 改这里的版本号 →
+      提交推送 → 硬刷新 /admin/ 验证。
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/@sveltia/cms@0.248.1/dist/sveltia-cms.js"></script>
   </head>
-  <body>
-    <script src="https://cdn.jsdelivr.net/npm/@sveltia/cms/dist/sveltia-cms.js"></script>
-  </body>
+  <body></body>
 </html>
