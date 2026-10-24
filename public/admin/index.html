@@ -12,7 +12,128 @@
       升级流程：先去 GitHub Release 确认新版修了什么 → 改这里的版本号 →
       提交推送 → 硬刷新 /admin/ 验证。
     -->
+
+    <!--
+      ⚠️ 临时诊断代码 —— 问题定位完成后必须连同下面的 <div> 一起删掉。
+      作用：Sveltia 内部出错时会把详情 console.error 出去，但界面只提示
+      "Check the browser console for details"，不开 F12 就看不到。
+      这里劫持 console.error / window.onerror / unhandledrejection，
+      把原始错误直接渲染成页面右下角的浮层，方便截图反馈。
+      注意：这段必须写在 sveltia-cms.js 【之前】，否则劫持不到早期错误。
+    -->
+    <style>
+      #__errbox {
+        position: fixed;
+        right: 12px;
+        bottom: 12px;
+        z-index: 2147483647;
+        display: none;
+        max-width: min(92vw, 760px);
+        background: #fff;
+        border: 2px solid #cf222e;
+        border-radius: 8px;
+        padding: 10px 12px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+      }
+      #__errbox pre {
+        margin: 0;
+        max-height: 40vh;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+        font: 12px/1.55 ui-monospace, Consolas, Menlo, monospace;
+        color: #1f2328;
+      }
+      #__errbox button {
+        font-size: 12px;
+        padding: 2px 10px;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+        background: #f6f8fa;
+        cursor: pointer;
+      }
+    </style>
+    <script>
+      (function () {
+        var list = [];
+        var raw = console.error.bind(console);
+
+        function fmt(args) {
+          return Array.prototype.map
+            .call(args, function (x) {
+              if (x instanceof Error) return x.name + ": " + x.message + "\n" + (x.stack || "");
+              if (typeof x === "string") return x;
+              try {
+                return JSON.stringify(x);
+              } catch (e) {
+                return String(x);
+              }
+            })
+            .join(" ");
+        }
+
+        function render() {
+          var box = document.getElementById("__errbox");
+          var body = document.getElementById("__errbody");
+          if (!box || !body) return;
+          document.getElementById("__errcount").textContent = list.length;
+          body.textContent = list
+            .map(function (t, i) {
+              return "[" + (i + 1) + "] " + t;
+            })
+            .join("\n\n");
+          box.style.display = "";
+        }
+
+        console.error = function () {
+          list.push(fmt(arguments));
+          if (list.length > 20) list.shift();
+          render();
+          raw.apply(console, arguments);
+        };
+
+        window.addEventListener("error", function (e) {
+          list.push("window.onerror: " + e.message + " (" + e.filename + ":" + e.lineno + ")");
+          render();
+        });
+        window.addEventListener("unhandledrejection", function (e) {
+          var r = e.reason;
+          list.push("unhandledrejection: " + ((r && (r.stack || r.message)) || String(r)));
+          render();
+        });
+
+        window.addEventListener("DOMContentLoaded", function () {
+          document.getElementById("__errclose").onclick = function () {
+            document.getElementById("__errbox").style.display = "none";
+          };
+          document.getElementById("__errcopy").onclick = function () {
+            navigator.clipboard.writeText(document.getElementById("__errbody").textContent).then(
+              function () {
+                this.textContent = "已复制";
+                var b = this;
+                setTimeout(function () {
+                  b.textContent = "复制";
+                }, 1500);
+              }.bind(this)
+            );
+          };
+        });
+      })();
+    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/@sveltia/cms@0.248.1/dist/sveltia-cms.js"></script>
   </head>
-  <body></body>
+  <body>
+    <div id="__errbox">
+      <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px">
+        <b style="color: #cf222e; font-size: 13px">后台内部错误（<span id="__errcount">0</span> 条）</b>
+        <span>
+          <button id="__errcopy">复制</button>
+          <button id="__errclose">关闭</button>
+        </span>
+      </div>
+      <pre id="__errbody"></pre>
+    </div>
+  </body>
 </html>
