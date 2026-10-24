@@ -74,6 +74,11 @@
         }
 
         function render() {
+          // 双保险：同时写进 localStorage，即使页面 UI 被清空/缓存，
+          // 也能在 /admin/api-check.html 里把错误读出来
+          try {
+            localStorage.setItem("__sveltia_errors", JSON.stringify(list));
+          } catch (e) {}
           var box = document.getElementById("__errbox");
           var body = document.getElementById("__errbody");
           if (!box || !body) return;

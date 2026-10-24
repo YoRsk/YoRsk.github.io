@@ -73,6 +73,17 @@
     <br />
     <button id="run">开始检测</button>
 
+    <hr style="margin: 32px 0; border: 0; border-top: 1px solid #d0d7de" />
+
+    <h2>读取后台报错</h2>
+    <p>
+      如果你刚才在 <a href="/admin/">/admin</a> 登录后看到过「errors while parsing entry files」那条横幅，
+      那里的原始错误已经被记下来了。不用开 F12，点下面按钮直接读出来：
+    </p>
+    <button id="readErr">读取后台错误</button>
+    <button id="clearErr" style="background: #6e7781">清除记录</button>
+    <pre id="errOut" style="margin-top: 16px; white-space: pre-wrap; word-break: break-all; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 12px; font: 12px/1.6 ui-monospace, Consolas, monospace; min-height: 60px"></pre>
+
     <table id="out" style="display: none">
       <thead>
         <tr><th style="width: 26%">检测项</th><th style="width: 12%">结果</th><th>详情</th></tr>
@@ -200,6 +211,31 @@
 
         btn.disabled = false;
         btn.textContent = '重新检测';
+      };
+
+      // ---- 读取 /admin 记下的错误（localStorage 同源共享） ----
+      var errOut = document.getElementById('errOut');
+      document.getElementById('readErr').onclick = function () {
+        var raw = localStorage.getItem('__sveltia_errors');
+        if (!raw) {
+          errOut.textContent =
+            '没有记录到错误。\n→ 请先去 https://yorsk.github.io/admin/ 登录一次（等到那条报错横幅出现），再回到这个页面点「读取后台错误」。';
+          return;
+        }
+        try {
+          var arr = JSON.parse(raw);
+          errOut.textContent = arr
+            .map(function (t, i) {
+              return '[' + (i + 1) + '] ' + t;
+            })
+            .join('\n\n');
+        } catch (e) {
+          errOut.textContent = raw;
+        }
+      };
+      document.getElementById('clearErr').onclick = function () {
+        localStorage.removeItem('__sveltia_errors');
+        errOut.textContent = '已清除。';
       };
     </script>
   </body>
