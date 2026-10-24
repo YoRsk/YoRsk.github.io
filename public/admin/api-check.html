@@ -82,6 +82,7 @@
     </p>
     <button id="readErr">读取后台错误</button>
     <button id="clearErr" style="background: #6e7781">清除记录</button>
+    <button id="clearCache" style="background: #9a6700">清除后台缓存（IndexedDB）</button>
     <pre id="errOut" style="margin-top: 16px; white-space: pre-wrap; word-break: break-all; background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 12px; font: 12px/1.6 ui-monospace, Consolas, monospace; min-height: 60px"></pre>
 
     <table id="out" style="display: none">
@@ -236,6 +237,43 @@
       document.getElementById('clearErr').onclick = function () {
         localStorage.removeItem('__sveltia_errors');
         errOut.textContent = '已清除。';
+      };
+
+      // ---- 清除 Sveltia 的 IndexedDB 缓存（本域名下只有它在使用） ----
+      // 根因：缓存里写入了"有 meta 但 text 为空"的脏条目，Sveltia 看到 meta 存在
+      // 就不再重新拉取正文 → 永远报 could not be read。清掉即可强制全量重拉。
+      document.getElementById('clearCache').onclick = async function () {
+        errOut.textContent = '正在清除缓存…';
+        var dbs = [];
+        try {
+          dbs = (await indexedDB.databases()) || [];
+        } catch (e) {
+          errOut.textContent = '无法列出 IndexedDB：' + (e && e.message);
+          return;
+        }
+        var names = dbs
+          .map(function (d) {
+            return d.name;
+          })
+          .filter(Boolean);
+        if (!names.length) {
+          errOut.textContent = '没有找到任何缓存库（说明缓存不在这个浏览器里）。';
+          return;
+        }
+        var done = 0;
+        for (var i = 0; i < names.length; i++) {
+          try {
+            await new Promise(function (res) {
+              var r = indexedDB.deleteDatabase(names[i]);
+              r.onsuccess = r.onerror = r.onblocked = res;
+            });
+            done++;
+          } catch (e) {}
+        }
+        errOut.textContent =
+          '已清除 ' + done + '/' + names.length + ' 个缓存库：' + names.join(', ') +
+          '\n\n下一步：打开 https://yorsk.github.io/admin/ → 按 Ctrl+Shift+R 硬刷新 → 重新登录。' +
+          '这次文章列表应该就出来了。';
       };
     </script>
   </body>
