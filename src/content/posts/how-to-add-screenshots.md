@@ -1,7 +1,7 @@
 ---
 title: SSO 一次登录的背后：OAuth2 / OIDC / JWT 是怎么串起来的
 pubDatetime: 2026-08-30T18:40:00+09:00
-modDatetime: 2026-10-24T21:00:00+09:00
+modDatetime: 2026-10-24T21:25:00+09:00
 draft: false
 tags: ["security", "通信"]
 description: "用一次登录的完整过程串起 SSO / OAuth2 / OIDC / JWT：每一步为什么这样设计、token 为什么不给浏览器、网关和 IdP 怎么分工，以及 Nginx + Lua 落地的取舍。"
@@ -97,6 +97,16 @@ sequenceDiagram
 换 token 的请求是**网关服务器直接发给 IdP 的**（不经过浏览器），并且必须同时出示 `client_id + client_secret`。client_secret 只存在于网关服务器上，浏览器永远看不到。
 
 所以即使 code 被截获，攻击者没有 client_secret 也换不出任何东西——code 只是一张"取件凭条"，token 才是"证件"，取件必须凭条和密钥一起出示。同时 code 通常**几分钟内过期、只能用一次**，把泄露后的可用窗口压到最小。
+
+**这三样东西各是谁的？**（高频误解点）
+
+| 东西 | 属于谁 | 类比 |
+| --- | --- | --- |
+| code | 这次登录的一次性凭条（绑定了该用户 + 该应用），**本身不含用户信息** | 快递取件码 |
+| client_id | **网关**在 IdP 注册时拿到的公开身份（就在 URL 里，人人可见） | 公司名 |
+| client_secret | **网关**的密钥，只存在网关服务器上，IdP 留有登记 | 公章 |
+
+注意区分：**code 里并没有用户信息**——用户信息在换回来的 id_token 里（比如 sub、name 这些 claim）。client_id/secret 也不是 IdP 的，而是**应用自己的身份**：网关拿三件套来换 token 时，IdP 核对"这个 client_id 注册过吗？secret 对得上吗？code 是我刚发出去的那张吗？"，三个都对才发 token。
 
 ### ④ 网关为什么不把 JWT 直接给浏览器，而是换成 session_id
 
