@@ -1,7 +1,7 @@
 ---
 title: SSO 一次登录的背后：OAuth2 / OIDC / JWT 是怎么串起来的
 pubDatetime: 2026-08-30T18:40:00+09:00
-modDatetime: 2026-10-24T21:35:00+09:00
+modDatetime: 2026-10-24T21:40:00+09:00
 draft: false
 tags: ["security", "通信"]
 description: "用一次登录的完整过程串起 SSO / OAuth2 / OIDC / JWT：每一步为什么这样设计、token 为什么不给浏览器、网关和 IdP 怎么分工，以及 Nginx + Lua 落地的取舍。"
@@ -120,6 +120,14 @@ sequenceDiagram
 
 注意区分：**code 里并没有用户信息**——用户信息在换回来的 id_token 里（比如 sub、name 这些 claim）。client_id/secret 也不是 IdP 的，而是**应用自己的身份**：网关拿三件套来换 token 时，IdP 核对"这个 client_id 注册过吗？secret 对得上吗？code 是我刚发出去的那张吗？"，三个都对才发 token。
 
+**追问：那攻击者拿到 code 去找网关，网关带上 client_secret 去找 IdP，不就换出 token 了吗？**
+
+这个攻击思路是对的，而且真实存在（叫 code 截获 / Login CSRF）：攻击者把偷来的 code 发给网关回调地址，网关确实会去 IdP 换 token——成功后 session_id 会发给**攻击者的浏览器**，攻击者就以受害者身份登录了。所以规范里配了两道专门的锁：
+
+- **state 参数**：发起登录时，网关在**当前这个浏览器会话**里存一个随机数 state，授权请求带给 IdP，IdP 回调时原样带回，网关校验一致才继续。攻击者拿受害者的 code 来回调时，他自己的会话里没有这个 state → 直接拒绝。它锁的是"这次回调必须对应我之前发起的那次登录"。
+- **PKCE**（code_verifier / code_challenge，可理解为换 token 的动态口令）：授权请求时网关先给 IdP 一个哈希，换 token 时必须出示能产生该哈希的原始密钥。攻击者截获 code 但没有密钥 → 换不出 token。它本来是为没有 secret 的移动端设计的，现在官方建议所有客户端都开。
+- 兜底：code 只能用一次、几分钟内过期、IdP 只把 code 发回注册过的 redirect_uri。
+
 ### ④ 网关为什么不把 JWT 直接给浏览器，而是换成 session_id
 
 三个 token 到网关手里后，网关做了一次"落地"：把真 token 存进 Redis，浏览器只收到一个无信息量的随机串 `session_id`（放在 HttpOnly Cookie 里，JS 读不到）。这样做的收益：
@@ -131,6 +139,12 @@ sequenceDiagram
 ### ⑤ 后端怎么知道你是谁：JWT 在这里才真正出场
 
 网关从 Redis 取出 JWT，放进 `Authorization: Bearer <jwt>` 请求头转发给后端。后端**不查库、不问 IdP**，用 IdP 的公钥（从 IdP 公开的 jwks_uri 下载）在本地验证签名，然后从 payload 里读 `sub`（用户 ID）和角色。这就是为什么 JWT 要自带签名——**验证成本被摊到每个后端本地完成**，IdP 不会成为每次请求的瓶颈。
+
+**JWT 的 payload 里一般装什么**：
+
+- 标准字段：iss（签发者）、sub（用户 ID）、aud（给谁用）、exp（过期时间）、iat（签发时间）
+- 业务字段：name、email、roles / groups（权限信息）
+- ⚠️ **payload 是 Base64 编码，不是加密**——谁拿到都能解码看内容。签名保证的是"没被篡改"，不是"别人看不见"。所以绝不要在 payload 里放密码、密钥等敏感信息。
 
 # 4. 过期了怎么办：refresh token 的静默续期
 
@@ -155,6 +169,13 @@ sequenceDiagram
 **一句话串起来**：SSO 是想要的体验 → 用 OIDC 做认证来实现 → OIDC 复用 OAuth2 的授权码机制做底座 → 三个 token 用 JWT 格式承载。
 
 # 6. Token vs Session：不是二选一，而是各管一段
+
+先把两个词的定义钉死：
+
+- **有状态（stateful）**：服务端必须存一份"会话记录"才能判断请求合法性——判断一次就要查一次存储。Session 是典型的有状态。
+- **无状态（stateless）**：服务端不存任何会话记录，凭请求自带的凭证 + 验签就能判断。JWT 是典型的无状态。
+
+注意别混淆：**JWT 本身无状态，但系统可以混着用**——本文架构就是浏览器↔网关走有状态 session，网关↔后端走无状态 JWT。
 
 | | JWT（自包含） | Session（引用式） |
 | --- | --- | --- |
