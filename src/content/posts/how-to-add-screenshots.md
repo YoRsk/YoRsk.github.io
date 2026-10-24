@@ -1,7 +1,7 @@
 ---
 title: SSO 一次登录的背后：OAuth2 / OIDC / JWT 是怎么串起来的
 pubDatetime: 2026-08-30T18:40:00+09:00
-modDatetime: 2026-10-24T21:25:00+09:00
+modDatetime: 2026-10-24T21:35:00+09:00
 draft: false
 tags: ["security", "通信"]
 description: "用一次登录的完整过程串起 SSO / OAuth2 / OIDC / JWT：每一步为什么这样设计、token 为什么不给浏览器、网关和 IdP 怎么分工，以及 Nginx + Lua 落地的取舍。"
@@ -44,6 +44,18 @@ SSO 的核心是**认证**。而 OAuth2 其实是个**授权**协议——它本
 
 注意一个容易误解的点：**网关不认识任何用户，也没有用户库**。它只信任派出所签发的证件，大部分请求只翻自己的登记表——这正是网关能保持高性能的原因，只有登记表里没有或过期了才真的去问派出所。
 
+**那张 Redis 登记表是网关的，不是 IdP 的。** IdP 发完 token 就不跟踪"谁在访问哪个应用"——它可能同时服务几十个应用，如果每个应用的会话都归 IdP 管，IdP 就成了所有请求的必经之路和单点瓶颈。所以每个接入方（网关）各自保管自己的会话。
+
+由此引出整个体系里其实有**两层会话**，分工完全不同：
+
+| | IdP 侧会话 | 网关侧 Redis 会话 |
+| --- | --- | --- |
+| 存哪 | IdP 自己的存储（Keycloak 用 Infinispan） | 网关旁边的 Redis |
+| 凭证 | 浏览器里 IdP 域下的 SSO Cookie | 浏览器里网关域下的 session_id Cookie |
+| 管什么 | **跨系统**：还要不要你重新输密码 | **单系统**：这次访问放不放行 |
+
+你在 A 系统登录过后，IdP 给自己种了 SSO Cookie。之后你去 B 系统，302 跳到 IdP 时它发现 Cookie 还在，就直接发 code 跳回去、不再让你输密码——**"单点"体验的来源是 IdP 侧这层会话**。而 B 系统网关侧的流程（换 token、写自己那张 Redis）照走不误，和 A 系统互不干扰。
+
 # 3. 完整流程：一次登录发生了什么
 
 这是全文的核心。先看总图，再逐步拆"为什么"。
@@ -52,7 +64,7 @@ SSO 的核心是**认证**。而 OAuth2 其实是个**授权**协议——它本
 sequenceDiagram
     participant B as 浏览器
     participant G as 网关 Nginx+Lua
-    participant R as Redis
+    participant R as Redis（网关侧）
     participant I as IdP Keycloak
     participant S as 后端服务
 
